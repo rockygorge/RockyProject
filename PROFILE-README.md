@@ -5,7 +5,13 @@ I work with Azure infrastructure, Terraform, CI/CD, and cloud operations. This p
 
 [LinkedIn](https://www.linkedin.com/in/rakeshg1234567/) · [Portfolio](https://github.com/rockygorge/RockyProject)
 
-## Featured work
+## Featured build: PlatformOps Board
+
+A three-tier web application with a Python API and PostgreSQL, Kubernetes manifests, Terraform-defined AKS/ACR, and GitHub Actions delivery. Includes health checks, persistent storage, network policies, contract tests, and operations documentation.
+
+[Explore the code and demo walkthrough](https://github.com/rockygorge/RockyProject/tree/main/three-tier-platform) · [Verification status](https://github.com/rockygorge/RockyProject/blob/main/three-tier-platform/docs/verification.md)
+
+## Earlier lab
 
 ### Azure platform delivery lab
 A static website provisioned with Terraform and delivered through GitHub Actions using Azure OIDC federation. The lab separates state from application resources and includes validation, a saved-plan apply, publishing, and a content smoke test.
