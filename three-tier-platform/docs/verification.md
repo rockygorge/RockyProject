@@ -1,32 +1,44 @@
 # Verification record
 
-## Executed in the authoring environment
+## Verified GitHub Actions run
 
-- Six standard-library unittest test cases passed against the SQLite adapter.
-- Tests exercise the HTTP API create/update path and persisted data, invalid input, SQL payload handling, missing routes, database-outage readiness behavior, and metrics accounting.
+**[PlatformOps CI run 40372553088](https://github.com/rockygorge/RockyProject/actions/runs/40372553088)** passed on October 26, 2026, for implementation commit `fec8dd9caa50cf8203c8534acc1dc1d71c81ba51`.
 
-## Configured for GitHub Actions
+Both jobs completed successfully:
 
-- Repeat the contract tests against a disposable PostgreSQL 16 service.
-- Build both container images and start the three-tier Compose stack.
-- Smoke test Nginx → API → PostgreSQL.
-- Restart the API and check that a previously created task persists.
-- Validate Kubernetes objects with kubeconform.
-- Initialize the Terraform provider without a backend and run terraform validate.
+| Check | Result |
+| --- | --- |
+| Six API/HTTP contract tests with SQLite | Passed |
+| Same six contract tests against PostgreSQL 16 | Passed |
+| Deployment shell syntax | Passed |
+| Kubernetes resource schema validation | Passed |
+| API and Nginx container builds | Passed |
+| Compose startup for all three tiers | Passed |
+| End-to-end frontend/API/database smoke test | Passed |
+| Task persistence after API restart | Passed |
+| Terraform provider initialization | Passed |
+| Terraform configuration validation with AzureRM 4.81.0 | Passed |
 
-CI execution results must be checked on GitHub; configuration alone is not proof that these checks passed.
+The first CI run identified a missing AKS Entra tenant setting. It was corrected before this successful run. Provider validation is not an Azure plan or deployment.
 
-## Not yet verified
+## Executed locally
 
-Docker, kubectl, Terraform, and an Azure session were not available in the authoring environment. No Azure resources were provisioned. Kubernetes scheduling, NetworkPolicy enforcement, CSI persistence, HPA behavior, Azure identity/RBAC, and the application release remain deployment acceptance checks.
+Six standard-library unittest cases also passed against SQLite in the authoring environment. Python syntax, YAML parsing, and deployment shell syntax were checked.
 
-## Acceptance checklist
+## Not yet verified in Azure
 
-- [ ] All PlatformOps CI jobs pass on the published commit.
+No Azure resources were provisioned as part of this build. Kubernetes scheduling, actual NetworkPolicy enforcement, CSI disk persistence, HPA behavior, cloud identity/RBAC, and the application release remain deployment acceptance checks. Passing object schemas does not prove these runtime behaviors.
+
+## Cloud acceptance checklist
+
 - [ ] Azure plan reviewed and cloud cost accepted.
 - [ ] Infrastructure apply succeeds.
 - [ ] Release builds/pushes images and all Kubernetes rollouts succeed.
-- [ ] Full smoke test passes through the web service.
+- [ ] Full smoke test passes through the Kubernetes web service.
 - [ ] Database outage/recovery and task persistence tested.
-- [ ] Rollback of a known compatible app revision tested.
+- [ ] Rollback of a known compatible application revision tested.
 - [ ] Cleanup behavior and remaining resources reviewed.
+
+## Scope of the evidence
+
+The recorded CI run exercised containers on a GitHub-hosted Linux runner, not AKS. PostgreSQL is single-instance and the API restart persistence check is not a backup/restore test or a database high-availability guarantee. No load, capacity, penetration, or disaster recovery test is claimed.
