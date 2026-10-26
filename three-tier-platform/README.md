@@ -35,6 +35,22 @@ flowchart TD
 | Operations | Liveness separate from database readiness, Prometheus-format metrics, JSON logs, rollout checks |
 | Verification | SQLite-backed contract tests locally; PostgreSQL/container/schema/Terraform checks configured in CI |
 
+## Engineering decisions and trade-offs
+
+| Decision | Reason and limitation |
+| --- | --- |
+| Separate frontend, API, and database | Gives each tier a clear responsibility and lets the API scale independently. This lab does not establish production throughput or availability. |
+| PostgreSQL StatefulSet and persistent volume | Makes data persistence visible in the Kubernetes design. The single database instance is a learning choice; production would need tested backups, recovery, and high availability. |
+| Network policies and internal services | Define intended communication paths and avoid a public application endpoint. Enforcement depends on the cluster networking configuration and requires an actual cluster test. |
+| Readiness and liveness checks | Distinguish whether the API can serve requests from whether its process is alive; this supports safer rollouts. |
+| Azure OIDC for deployment | The workflows are designed to use federated identity rather than a stored Azure client secret. The Azure deployment workflow has not yet been verified against AKS. |
+
+### Evidence and next validation
+
+The [verification record](docs/verification.md) separates passing CI checks from work that still needs a live cluster. The local Compose end-to-end test included an API restart and a persistence check; it is not a Kubernetes failure or recovery test. A useful next exercise is to deploy to a local cluster, interrupt the API, inspect pod status and logs, and record the observed recovery.
+
+This is an AI-assisted personal portfolio project. Its implementation and documentation are intended for review, hands-on practice, and iterative improvement.
+
 ## Run the complete application locally
 
 Prerequisites: Git, Docker Engine/Desktop with Compose v2, Python 3.12+, and OpenSSL.
