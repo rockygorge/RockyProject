@@ -12,7 +12,7 @@ A three-tier operations dashboard with **Nginx + Python + PostgreSQL**, Kubernet
 - Separate frontend, API, and persistent data tier.
 - OIDC-based Azure deployment, source-SHA image tags, health checks, and rollout verification.
 - Network policies, non-root application containers, resource limits, autoscaling configuration, and operational runbooks.
-- Local API tests executed; PostgreSQL/container/infrastructure checks run in CI. Azure deployment remains a documented acceptance step.
+- **CI verified:** PostgreSQL integration, container builds, end-to-end smoke test, restart persistence, Kubernetes schemas, and Terraform validation all passed. Azure deployment remains a documented acceptance step.
 
 **[Explore the project and run it locally](three-tier-platform/README.md)** · [Architecture](three-tier-platform/docs/architecture.md) · [Demo walkthrough](three-tier-platform/docs/demo.md) · [Verification](three-tier-platform/docs/verification.md)
 
