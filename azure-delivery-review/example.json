@@ -1,0 +1,8 @@
+{
+  "terraform_validation": true,
+  "plan_review": true,
+  "short_lived_auth": true,
+  "restricted_permissions": false,
+  "deployment_approval": false,
+  "recovery_plan": false
+}
