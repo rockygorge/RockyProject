@@ -1,0 +1,24 @@
+:root{font-family:Inter,system-ui,sans-serif;color:#19253b;background:#f2f5f9}
+*{box-sizing:border-box}body{margin:0}header{background:#10243c;color:white;padding:56px max(6vw,24px) 72px;border-bottom:5px solid #26c8ac}
+.eyebrow{font-size:12px;letter-spacing:.15em;color:#77e4cd;font-weight:700}
+h1{font-size:clamp(32px,5vw,52px);letter-spacing:-.04em;margin:22px 0 16px}
+h1 span{display:block;font-size:20px;letter-spacing:0;font-weight:400;color:#bbcad9;margin-top:12px}
+header p{max-width:680px;color:#c9d6e2;line-height:1.7}
+main{max-width:1120px;margin:-32px auto 0;padding:0 24px 36px}
+.architecture{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.architecture div,.board{background:white;border:1px solid #dce3ec;border-radius:12px;padding:24px;box-shadow:0 5px 18px #11243b08}
+.architecture b{font-size:11px;letter-spacing:.1em;color:#157b70}
+.architecture strong,.architecture small{display:block;margin-top:12px}
+.architecture small{color:#637187}.board{margin-top:24px;padding:30px}
+.heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h2{font-size:23px}.online{color:#14735c}.offline{color:#b32639}
+#connection{font-size:13px;font-weight:600}label{display:block;font-size:13px;font-weight:600;margin:10px 0}
+.entry{display:flex;gap:12px}input{width:100%;min-width:0;padding:14px;border:1px solid #bac6d4;border-radius:6px;font:inherit}
+button{background:#086d62;color:white;border:0;border-radius:6px;padding:12px 20px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+button:hover{background:#07594f}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #1d85d0;outline-offset:3px}
+#message{color:#b32639;font-size:14px;min-height:20px}
+article{display:flex;justify-content:space-between;align-items:center;gap:18px;border-top:1px solid #e2e8f0;padding:18px 0}
+article span{overflow-wrap:anywhere}select{padding:8px;border:1px solid #c5d0dd;border-radius:5px;background:white}
+.secondary{margin-top:20px;background:#e7eef3;color:#233a50}.secondary:hover{background:#d7e4eb}
+footer{text-align:center;color:#637187;font-size:12px;margin-top:28px;line-height:1.8}
+@media(max-width:650px){.architecture{grid-template-columns:1fr}.entry,.heading{align-items:stretch;flex-direction:column}article{align-items:flex-start}.board{padding:20px}}

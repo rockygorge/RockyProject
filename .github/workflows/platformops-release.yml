@@ -1,0 +1,61 @@
+name: PlatformOps application release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: platformops-dev-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    environment: platformops-dev
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY_NAME: ${{ vars.REGISTRY_NAME }}
+      REGISTRY_SERVER: ${{ vars.REGISTRY_SERVER }}
+      RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
+      CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/setup-kubectl@v4
+      - uses: azure/use-kubelogin@v1
+        with: {kubelogin-version: v0.1.6}
+      - name: Test the source being released
+        working-directory: three-tier-platform/api
+        run: python3 -m unittest -v test_app.py
+      - name: Build and push source-tagged images
+        run: |
+          az acr login --name "$REGISTRY_NAME"
+          for component in api web; do
+            docker build -t "$REGISTRY_SERVER/platformops-$component:$IMAGE_TAG" "three-tier-platform/$component"
+            docker push "$REGISTRY_SERVER/platformops-$component:$IMAGE_TAG"
+          done
+      - name: Authenticate and deploy
+        run: |
+          az aks get-credentials --resource-group "$RESOURCE_GROUP" --name "$CLUSTER_NAME" --overwrite-existing
+          kubelogin convert-kubeconfig -l azurecli
+          bash three-tier-platform/scripts/deploy.sh
+      - name: Smoke test the Kubernetes service path
+        run: |
+          kubectl -n platformops port-forward svc/web 8080:8080 > /tmp/port-forward.log 2>&1 &
+          forward_pid=$!
+          trap 'kill "$forward_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:8080/healthz; then break; fi
+            sleep 2
+          done
+          python3 three-tier-platform/scripts/smoke.py
+      - name: Deployment diagnostics
+        if: failure()
+        run: |
+          kubectl -n platformops get pods,deployments,statefulsets,pvc
+          kubectl -n platformops get events --sort-by=.metadata.creationTimestamp

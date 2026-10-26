@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PlatformOps Board</title><link rel="stylesheet" href="/style.css"></head>
+<body><header><div class="eyebrow">RAKESH GORIGA / PLATFORM ENGINEERING LAB</div>
+<h1>PlatformOps Board<span>Three tiers. One observable delivery path.</span></h1>
+<p>Track operational work across a web frontend, Python API, and PostgreSQL.</p></header>
+<main><section class="architecture"><div><b>01 / WEB</b><strong>Nginx + JavaScript</strong><small>Same-origin reverse proxy</small></div>
+<div><b>02 / APPLICATION</b><strong>Python REST API</strong><small>Health probes + metrics</small></div>
+<div><b>03 / DATA</b><strong>PostgreSQL</strong><small>Persistent task storage</small></div></section>
+<section class="board"><div class="heading"><h2>Operations queue</h2><span id="connection" role="status">Connecting…</span></div>
+<form id="task-form"><label for="title">New operational task</label><div class="entry">
+<input id="title" required maxlength="160" placeholder="Example: verify readiness during a database restart">
+<button>Add task</button></div></form>
+<p id="message" role="alert"></p><div id="tasks" aria-live="polite"></div>
+<button id="refresh" class="secondary">Refresh queue</button></section>
+<footer>Personal engineering lab · Access through localhost or kubectl port-forward · No authentication implemented</footer></main>
+<script src="/app.js"></script></body></html>

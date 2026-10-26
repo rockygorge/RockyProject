@@ -1,0 +1,85 @@
+name: PlatformOps CI
+on:
+  push:
+    branches: [main]
+    paths: ["three-tier-platform/**", ".github/workflows/platformops-*.yml"]
+  pull_request:
+    paths: ["three-tier-platform/**", ".github/workflows/platformops-*.yml"]
+permissions:
+  contents: read
+jobs:
+  api-and-containers:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: platformops
+          POSTGRES_DB: platformops_test
+          POSTGRES_PASSWORD: ci-disposable-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U platformops -d platformops_test"
+          --health-interval 5s --health-timeout 3s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit and HTTP tests with SQLite
+        working-directory: three-tier-platform/api
+        run: python -m unittest -v test_app.py
+      - name: Install PostgreSQL driver
+        run: pip install -r three-tier-platform/api/requirements.txt
+      - name: Repeat contract tests against PostgreSQL
+        working-directory: three-tier-platform/api
+        env:
+          TEST_DATABASE_URL: postgresql://platformops:ci-disposable-password@localhost:5432/platformops_test
+        run: python -m unittest -v test_app.py
+      - name: Check deployment script syntax
+        run: bash -n three-tier-platform/scripts/deploy.sh
+      - name: Validate Kubernetes resource schemas
+        run: >-
+          docker run --rm
+          -v "$PWD/three-tier-platform/k8s:/manifests:ro"
+          ghcr.io/yannh/kubeconform:v0.6.7
+          -strict -summary -kubernetes-version 1.31.0 /manifests
+      - name: Build and run three tiers
+        working-directory: three-tier-platform
+        run: |
+          export POSTGRES_PASSWORD="$(openssl rand -hex 24)"
+          docker compose up --build --wait --wait-timeout 180
+      - name: End-to-end smoke test through Nginx
+        run: python three-tier-platform/scripts/smoke.py
+      - name: Verify database persistence after API restart
+        working-directory: three-tier-platform
+        run: |
+          export POSTGRES_PASSWORD=unused-at-restart
+          docker compose restart api
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/api/tasks > /tmp/tasks.json; then
+              break
+            fi
+            sleep 2
+          done
+          python -c 'import json; d=json.load(open("/tmp/tasks.json")); assert any(t["title"].startswith("smoke-") and t["status"]=="done" for t in d["tasks"])'
+      - name: Collect logs and clean up
+        if: always()
+        working-directory: three-tier-platform
+        env:
+          POSTGRES_PASSWORD: unused-for-cleanup
+        run: |
+          docker compose logs --no-color
+          docker compose down --volumes
+  terraform-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - working-directory: three-tier-platform/infra
+        run: |
+          terraform fmt -recursive
+          terraform init -backend=false -input=false
+          terraform validate
