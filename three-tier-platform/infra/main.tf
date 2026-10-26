@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"
+      version = "= 4.81.0"
     }
   }
   backend "azurerm" {
@@ -13,6 +13,8 @@ terraform {
 provider "azurerm" {
   features {}
 }
+data "azurerm_client_config" "current" {}
+
 variable "prefix" {
   type        = string
   description = "3-12 lowercase letters or digits; used in resource names."
@@ -78,6 +80,7 @@ resource "azurerm_kubernetes_cluster" "platform" {
   }
   azure_active_directory_role_based_access_control {
     azure_rbac_enabled = true
+    tenant_id          = data.azurerm_client_config.current.tenant_id
   }
   network_profile {
     network_plugin      = "azure"
